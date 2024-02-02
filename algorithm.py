@@ -1,12 +1,10 @@
 import numpy as np
 from munkres import Munkres
 import time
-import multiprocessing
 
 K=10
 LH=22
 LG=LH+1
-mat_lock = multiprocessing.Lock()
 
 def Kmer(sequence, K): 
     # kmer.cpp provides a faster implement
@@ -88,23 +86,6 @@ def search(D):
         ans+=D[indexes[i]]
     return ans,indexes
 
-def compute_mat_values(i1, i2, Mat_combined_nv, Mat_combined_L,h,hl,g,gr,gl):
-    print(i1,i2)
-    v1 = add(g[i1], g[i2])
-    v2 = add(gr[i1], g[i2])
-    v3 = add(g[i1], gr[i2])
-    v4 = add(gr[i1], gr[i2])
-    for j in range(LH):
-        a1 = cos(h[j], v1)
-        a2 = cos(h[j], v2)
-        a3 = cos(h[j], v3)
-        a4 = cos(h[j], v4)
-        mat_lock.acquire()
-        Mat_combined_nv[i1][i2][j] = -max(a1, a2, a3, a4)
-        Mat_combined_L[i1][i2][j] = abs(gl[i1] + gl[i2] - hl[j])
-        mat_lock.release()
-        return
-
 def main():
     T1=time.time()
     g=list(np.load("nv_g_10.npy",allow_pickle=True))
@@ -125,7 +106,6 @@ def main():
             Mat_nv_gh[i][j]=-max(cos(h[i],g[j]),cos(h[i],gr[j]))
             Mat_L_gh[i][j]=abs(hl[i]-gl[j])
     
- 
     for i1 in range(LG):
         print(i1)
         for i2 in range(LG):
